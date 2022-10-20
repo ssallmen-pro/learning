@@ -1,0 +1,69 @@
+name: Submodule update test
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch to be used for running the tests
+        default: main
+        required: true
+        type: string
+
+jobs:
+  submodule-update:
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: Set the variables
+        id: variables
+        env:
+          BRANCH: 'main'
+        run: |
+          echo "BRANCH=${{ github.event.inputs.branch || env.BRANCH }}" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{env.BRANCH}} # Run for branch given as input or set as default
+
+      # - name: Setup known_hosts
+      #   id: ssh-setup
+      #   # echo "${{ secrets.GH_SSH_KEYS }}" >> $tmpdir/known_hosts
+      #   run: |
+      #     tmpdir=$(mktemp -d)
+      #     echo "tmpdir=$tmpdir" >> $GITHUB_OUTPUT
+      #     (echo "${{ secrets.GH_SSH_KEYS }}" | base64 -d) > $tmpdir/known_hosts
+      #     cat $tmpdir/known_hosts
+      #     echo "ssh-command=ssh -vvv -o UserKnownHostsFile=$tmpdir/known_hosts" >> $GITHUB_OUTPUT
+
+      # - name: Archive known_hosts
+      #   if: always()
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: known-hosts
+      #     path: "${{ steps.ssh-setup.outputs.tmpdir }}/known_hosts"
+
+      - name: SSH to github.com
+        env:
+          GIT_SSH_COMMAND: ${{ steps.ssh-setup.outputs.ssh-command }}
+        run: |
+          eval `ssh-agent -s`
+          ssh -T git@github.com
+          eval `ssh-agent -k`
+
+      # - name: Update submodule
+      #   env:
+      #     SSH_KEY_SUBMODULE: ${{ secrets.DEPLOY_KEY_FI_PO_TESTS }}
+      #     SUBMODULE_PATH: fi-po-tests
+      #     GIT_SSH_COMMAND: ${{ steps.ssh-setup.outputs.ssh-command }}
+      #   run: |
+      #     eval `ssh-agent -s`
+      #     echo "$SSH_KEY_SUBMODULE" | base64 -d
+      #     (echo "$SSH_KEY_SUBMODULE" | base64 -d) > "${{ steps.ssh-setup.outputs.tmpdir }}/deploy_key"
+      #     ssh-add <(echo "$SSH_KEY_SUBMODULE" | base64 -d); git submodule update --init -- "${SUBMODULE_PATH}"
+      #     eval `ssh-agent -k`
+
+      # - name: Archive deploy_key
+      #   if: always()
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: deploy_key
+      #     path: "${{ steps.ssh-setup.outputs.tmpdir }}/deploy_key"
