@@ -34,38 +34,22 @@ jobs:
           cat $tmpdir/known_hosts
           echo "ssh-command=ssh -vvv -o UserKnownHostsFile=$tmpdir/known_hosts" >> $GITHUB_OUTPUT
 
-      # - name: Archive known_hosts
-      #   if: always()
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: known-hosts
-      #     path: "${{ steps.ssh-setup.outputs.tmpdir }}/known_hosts"
-
-      - name: SSH to github.com
-        env:
-          SSH_KEY_SUBMODULE: ${{ secrets.DEPLOY_KEY_FI_PO_TESTS }}
-          GIT_SSH_COMMAND: ${{ steps.ssh-setup.outputs.ssh-command }}
-        run: |
-          eval `ssh-agent -s`
-          ssh-add <(echo "$SSH_KEY_SUBMODULE" | base64 -d)
-          ${{ steps.ssh-setup.outputs.ssh-command }} -T git@github.com
-          eval `ssh-agent -k`
-
-      # - name: Update submodule
+      # - name: SSH to github.com
       #   env:
       #     SSH_KEY_SUBMODULE: ${{ secrets.DEPLOY_KEY_FI_PO_TESTS }}
-      #     SUBMODULE_PATH: fi-po-tests
       #     GIT_SSH_COMMAND: ${{ steps.ssh-setup.outputs.ssh-command }}
       #   run: |
       #     eval `ssh-agent -s`
-      #     echo "$SSH_KEY_SUBMODULE" | base64 -d
-      #     (echo "$SSH_KEY_SUBMODULE" | base64 -d) > "${{ steps.ssh-setup.outputs.tmpdir }}/deploy_key"
-      #     ssh-add <(echo "$SSH_KEY_SUBMODULE" | base64 -d); git submodule update --init -- "${SUBMODULE_PATH}"
+      #     ssh-add <(echo "$SSH_KEY_SUBMODULE" | base64 -d)
+      #     ${{ steps.ssh-setup.outputs.ssh-command }} -T git@github.com
       #     eval `ssh-agent -k`
 
-      # - name: Archive deploy_key
-      #   if: always()
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: deploy_key
-      #     path: "${{ steps.ssh-setup.outputs.tmpdir }}/deploy_key"
+      - name: Update submodule
+        env:
+          SSH_KEY_SUBMODULE: ${{ secrets.DEPLOY_KEY_FI_PO_TESTS }}
+          SUBMODULE_PATH: fi-po-tests
+          GIT_SSH_COMMAND: ${{ steps.ssh-setup.outputs.ssh-command }}
+        run: |
+          eval `ssh-agent -s`
+          ssh-add <(echo "$SSH_KEY_SUBMODULE" | base64 -d); git submodule update --init -- "${SUBMODULE_PATH}"
+          eval `ssh-agent -k`
