@@ -43,9 +43,11 @@ jobs:
 
       - name: SSH to github.com
         env:
+          SSH_KEY_SUBMODULE: ${{ secrets.DEPLOY_KEY_FI_PO_TESTS }}
           GIT_SSH_COMMAND: ${{ steps.ssh-setup.outputs.ssh-command }}
         run: |
           eval `ssh-agent -s`
+          ssh-add <(echo "$SSH_KEY_SUBMODULE" | base64 -d)
           ${{ steps.ssh-setup.outputs.ssh-command }} -T git@github.com
           eval `ssh-agent -k`
 
