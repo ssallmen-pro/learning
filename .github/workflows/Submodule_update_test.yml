@@ -46,7 +46,7 @@ jobs:
           GIT_SSH_COMMAND: ${{ steps.ssh-setup.outputs.ssh-command }}
         run: |
           eval `ssh-agent -s`
-          ssh -T git@github.com
+          ${{ steps.ssh-setup.outputs.ssh-command }} -T git@github.com
           eval `ssh-agent -k`
 
       # - name: Update submodule
