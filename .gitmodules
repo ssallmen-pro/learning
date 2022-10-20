@@ -1,0 +1,3 @@
+[submodule "fi-po-tests"]
+	path = fi-po-tests
+	url = git@github.com:telia-company/fi-po-tests.git
