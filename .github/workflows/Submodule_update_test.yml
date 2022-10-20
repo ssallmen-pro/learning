@@ -24,15 +24,15 @@ jobs:
         with:
           ref: ${{env.BRANCH}} # Run for branch given as input or set as default
 
-      # - name: Setup known_hosts
-      #   id: ssh-setup
-      #   # echo "${{ secrets.GH_SSH_KEYS }}" >> $tmpdir/known_hosts
-      #   run: |
-      #     tmpdir=$(mktemp -d)
-      #     echo "tmpdir=$tmpdir" >> $GITHUB_OUTPUT
-      #     (echo "${{ secrets.GH_SSH_KEYS }}" | base64 -d) > $tmpdir/known_hosts
-      #     cat $tmpdir/known_hosts
-      #     echo "ssh-command=ssh -vvv -o UserKnownHostsFile=$tmpdir/known_hosts" >> $GITHUB_OUTPUT
+      - name: Setup known_hosts
+        id: ssh-setup
+        # echo "${{ secrets.GH_SSH_KEYS }}" >> $tmpdir/known_hosts
+        run: |
+          tmpdir=$(mktemp -d)
+          echo "tmpdir=$tmpdir" >> $GITHUB_OUTPUT
+          (echo "${{ secrets.GH_SSH_KEYS }}" | base64 -d) > $tmpdir/known_hosts
+          cat $tmpdir/known_hosts
+          echo "ssh-command=ssh -vvv -o UserKnownHostsFile=$tmpdir/known_hosts" >> $GITHUB_OUTPUT
 
       # - name: Archive known_hosts
       #   if: always()
