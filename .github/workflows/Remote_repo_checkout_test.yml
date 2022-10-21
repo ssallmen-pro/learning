@@ -1,4 +1,4 @@
-name: Submodule update test
+name: Remote repo checkout test
 
 on:
   workflow_dispatch:
