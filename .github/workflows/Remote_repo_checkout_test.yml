@@ -20,14 +20,19 @@ jobs:
         run: |
           echo "BRANCH=${{ github.event.inputs.branch || env.BRANCH }}" >> $GITHUB_ENV
 
-      # - name: Retrieve the deploy key for fi-po-tests and decode it
-      #   env:
-      #     DEPLOY_KEY_BASE64: ${{ secrets.DEPLOY_KEY_FI_PO_TESTS }}
-      #   run: |
-      #     (echo "$DEPLOY_KEY_BASE64" | base64 -d) > fi-po-tests-key
-
       - uses: actions/checkout@v3
         with:
+          ref: ${{ env.BRANCH }} # Run for branch given as input or set as default
+
+      - name: Get submodule SHAs
+        id: sha
+        run: |
+          echo "fi-po-tests=`git submodule--helper list | grep fi-po-tests | awk -F ' ' '{print $2}'`" >> $GITHUB_OUTPUT
+
+      - name: Checkout submodule fi-po-tests
+        uses: actions/checkout@v3
+        with:
           repository: telia-company/fi-po-tests
-          ref: ${{env.BRANCH}} # Run for branch given as input or set as default
+          ref: ${{ steps.sha.outputs.fi-po-tests }}
+          path: fi-po-tests
           ssh-key: ${{ secrets.DEPLOY_KEY_FI_PO_TESTS }}
